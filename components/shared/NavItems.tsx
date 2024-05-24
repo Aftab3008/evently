@@ -3,7 +3,10 @@ import { headerLinks } from "@/constants";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavItems() {
+interface NavItemsProps {
+  onClose?: () => void;
+}
+export default function NavItems({ onClose }: NavItemsProps) {
   const pathname = usePathname();
   return (
     <ul className="md:flex-between flex w-full flex-col items-start gap-5 md:flex-row">
@@ -16,7 +19,9 @@ export default function NavItems() {
               isActive && "text-primary-500"
             } flex-center p-medium-16 whitespace-nowrap`}
           >
-            <Link href={link.route}>{link.label}</Link>
+            <Link href={link.route} onClick={onClose}>
+              {link.label}
+            </Link>
           </li>
         );
       })}
