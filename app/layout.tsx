@@ -13,14 +13,26 @@ export const metadata: Metadata = {
   title: "Evently",
   description: "Evently is a platform for events management.",
 };
-
+const localization = {
+  signUp: {
+    start: {
+      subtitle: "to access Evently",
+    },
+  },
+  signIn: {
+    start: {
+      title: "Welcome back to Evently",
+      subtitle: "Sign to continue",
+    },
+  },
+};
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={localization}>
       <html lang="en">
         <body className={poppins.variable}>{children}</body>
       </html>

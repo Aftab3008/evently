@@ -24,18 +24,33 @@ import { Checkbox } from "../ui/checkbox";
 import { useUploadThing } from "@/lib/uploadthing";
 import { handleError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { createEvent } from "@/lib/actions/event.actions";
+import { createEvent, updateEvent } from "@/lib/actions/event.actions";
 import Loader from "./Loader";
+import { IEvent } from "@/lib/database/models/event.model";
 
 type EventFormProps = {
   userId: string;
   type: "Create" | "Update";
+  eventId?: string;
+  event?: IEvent;
 };
 
-export default function EventForm({ userId, type }: EventFormProps) {
+export default function EventForm({
+  userId,
+  type,
+  event,
+  eventId,
+}: EventFormProps) {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
-  const initialValues = eventDefaultValues;
+  const initialValues =
+    event && type === "Update"
+      ? {
+          ...event,
+          startDateTime: new Date(event.startDateTime),
+          endDateTime: new Date(event.endDateTime),
+        }
+      : eventDefaultValues;
   const { startUpload } = useUploadThing("imageUploader");
 
   const form = useForm<z.infer<typeof eventFormSchema>>({
@@ -60,6 +75,25 @@ export default function EventForm({ userId, type }: EventFormProps) {
         if (newEvent) {
           form.reset();
           router.push(`/events/${newEvent._id}`);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    if (type === "Update") {
+      if (!eventId) {
+        router.back();
+        return;
+      }
+      try {
+        const UpdatedEvent = await updateEvent({
+          userId,
+          event: { ...values, imageUrl: uploadedImageUrl, _id: eventId },
+          path: `/events/${eventId}`,
+        });
+        if (UpdatedEvent) {
+          form.reset();
+          router.push(`/events/${UpdatedEvent._id}`);
         }
       } catch (error) {
         console.error(error);
@@ -251,6 +285,7 @@ export default function EventForm({ userId, type }: EventFormProps) {
                       placeholder="Price"
                       min={0}
                       {...field}
+                      disabled={form.getValues("isFree")}
                       className="p-regular-16 border-0 bg-green-50 outline-offset-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <FormField
@@ -269,7 +304,10 @@ export default function EventForm({ userId, type }: EventFormProps) {
                               <Checkbox
                                 id="isFree"
                                 className="mr-2 h-5 w-5 border-2 border-primary-500"
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(e) => {
+                                  field.onChange(e);
+                                  form.setValue("price", "0");
+                                }}
                                 checked={field.value}
                               />
                             </div>
@@ -317,7 +355,7 @@ export default function EventForm({ userId, type }: EventFormProps) {
         >
           {form.formState.isSubmitting ? (
             <>
-              <Loader /> Submitting...
+              <Loader />
             </>
           ) : (
             `${type} Event`
