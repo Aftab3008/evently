@@ -17,7 +17,7 @@ export default function NavItems({ onClose }: NavItemsProps) {
             key={link.label}
             className={`${
               isActive && "text-primary-500"
-            } flex-center p-medium-16 whitespace-nowrap`}
+            } flex-center p-medium-16 whitespace-nowrap hover:scale-[1.15]  transform transition-all ease-in-out duration-300`}
           >
             <Link href={link.route} onClick={onClose}>
               {link.label}
