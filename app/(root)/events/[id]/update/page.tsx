@@ -1,6 +1,8 @@
 import EventForm from "@/components/shared/EventForm";
+import UnauthorizedMessage from "@/components/shared/UnauthorizedMessage";
 import { getEventById } from "@/lib/actions/event.actions";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 type UpdateEventProps = {
   params: {
@@ -12,6 +14,9 @@ export default async function page({ params: { id } }: UpdateEventProps) {
   const { sessionClaims } = auth();
   const userId = sessionClaims?.userId as string;
   const event = await getEventById(id);
+  if (event?.organizer._id !== userId) {
+    return <UnauthorizedMessage redirectPath={`/events/${id}`} />;
+  }
   return (
     <>
       <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">

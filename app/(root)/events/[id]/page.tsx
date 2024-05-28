@@ -1,3 +1,4 @@
+import { Types as MongooseTypes } from "mongoose";
 import CheckoutButton from "@/components/shared/CheckoutButton";
 import Collection from "@/components/shared/Collection";
 import {
@@ -7,11 +8,15 @@ import {
 import { formatDateTime } from "@/lib/utils";
 import { SearchParamProps } from "@/types";
 import Image from "next/image";
+import Error from "./error";
 
 export default async function page({
   params: { id },
   searchParams,
 }: SearchParamProps) {
+  if (!MongooseTypes.ObjectId.isValid(id)) {
+    return <Error error={{ name: "", message: "" }} />;
+  }
   const event = await getEventById(id);
   const relatedEvents = await getRelatedEventsByCategory({
     categoryId: event.category._id,

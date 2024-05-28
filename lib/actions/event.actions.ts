@@ -13,6 +13,7 @@ import User from "../database/models/user.model";
 import Event from "../database/models/event.model";
 import Category from "../database/models/category.model";
 import { revalidatePath } from "next/cache";
+import mongoose from "mongoose";
 
 const getCategoryByName = async (name: string) => {
   return Category.findOne({ name: { $regex: name, $options: "i" } });
@@ -54,6 +55,9 @@ export async function createEvent({ event, userId, path }: CreateEventParams) {
 
 export async function getEventById(eventId: string) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      throw new Error("Invalid ObjectId");
+    }
     await connectToDatabase();
     const event = await populateEvent(Event.findById(eventId));
     if (!event) {
@@ -107,6 +111,9 @@ export async function getAllEvents({
 
 export async function deleteEvent({ eventId, path }: DeleteEventParams) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      throw new Error("Invalid ObjectId");
+    }
     await connectToDatabase();
     const deletedEvent = await Event.findByIdAndDelete(eventId);
     if (deletedEvent) {
@@ -119,6 +126,10 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
 
 export async function updateEvent({ userId, event, path }: UpdateEventParams) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(event._id)) {
+      throw new Error("Invalid ObjectId");
+    }
+
     await connectToDatabase();
 
     const eventToUpdate = await Event.findById(event._id);
@@ -175,6 +186,12 @@ export async function getRelatedEventsByCategory({
   page = 1,
 }: GetRelatedEventsByCategoryParams) {
   try {
+    if (
+      !mongoose.Types.ObjectId.isValid(categoryId) ||
+      !mongoose.Types.ObjectId.isValid(eventId)
+    ) {
+      throw new Error("Invalid ObjectId");
+    }
     await connectToDatabase();
 
     const skipAmount = (Number(page) - 1) * limit;
