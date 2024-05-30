@@ -23,8 +23,8 @@ const localization = {
   },
   signIn: {
     start: {
-      title: "Welcome back to Evently",
-      subtitle: "Sign to continue",
+      title: "Sign In to continue",
+      subtitle: "",
     },
   },
 };
@@ -34,7 +34,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider localization={localization}>
+    <ClerkProvider
+      appearance={{
+        layout: {
+          logoImageUrl: "/assets/images/logo.svg",
+        },
+      }}
+      localization={localization}
+    >
       <html lang="en">
         <body className={poppins.variable}>
           {children}
